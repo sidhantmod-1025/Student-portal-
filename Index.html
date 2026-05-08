@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal Pro</title><style>
+*{box-sizing:border-box;}
+
+body {
+  padding-top: 80px;
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+  color: white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:10px;
+}
+
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  background:rgba(15,23,42,0.95);
+  backdrop-filter: blur(10px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 20px;
+  z-index:1000;
+  box-shadow:0 2px 10px rgba(0,0,0,0.4);
+}
+
+.logo{
+  font-size:20px;
+  font-weight:bold;
+  color:cyan;
+}
+
+.nav-links{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.nav-links button{
+  width:auto;
+  padding:8px 14px;
+  font-size:14px;
+}
+
+@media(max-width:600px){
+  .navbar{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  body{
+    padding-top:130px;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.box {
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,255,255,0.2);
+  text-align:center;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+}
+
+button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  background:cyan;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+button:hover {
+  background:#00f7ff;
+}
+
+.hidden { display:none; }
+
+.card {
+  background:#334155;
+  padding:12px;
+  margin:10px 0;
+  border-radius:10px;
+}
+
+/* 📱 Mobile */
+@media (max-width:480px){
+  .box{
+    padding:15px;
+  }
+  h2{
+    font-size:20px;
+  }
+}
+
+/* 📲 Tablet */
+@media (min-width:481px) and (max-width:768px){
+  .container{
+    max-width:500px;
+  }
+}
+
+/* 💻 Desktop */
+@media (min-width:769px){
+  .container{
+    max-width:600px;
+  }
+  .box{
+    padding:30px;
+  }
+}
+</style></head><body><div class="navbar">
+  <div class="logo">🎓 Student Portal</div>  <div class="nav-links">
+    <button onclick="show('home')">Home</button>
+    <button onclick="show('courses')">Courses</button>
+    <button onclick="show('contact')">Contact</button>
+    <button onclick="show('login')">Login</button>
+  </div>
+</div><div class="container"><div id="home" class="box">
+  <h2>🎓 Student Portal</h2>
+  <button onclick="show('register')">Register</button>
+  <button onclick="show('login')">Login</button>
+</div><div id="register" class="box hidden">
+  <h2>Register</h2>
+  <input id="rname" placeholder="Name">
+  <input id="rroll" placeholder="Roll No">
+  <input id="rpass" type="password" placeholder="Password">  <select id="rcourse">
+    <option value="">Select Course</option>
+    <option value="Math">Math</option>
+    <option value="Physics">Physics</option>
+    <option value="CS">Computer Science</option>
+  </select><button onclick="register()">Submit</button> <button onclick="show('home')">Back</button>
+
+</div><div id="login" class="box hidden">
+  <h2>Login</h2>
+  <input id="lroll" placeholder="Roll No">
+  <input id="lpass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <button onclick="show('home')">Back</button>
+</div><div id="profile" class="box hidden">
+  <h2 id="welcome"></h2>
+  <div id="pdata"></div>
+  <button onclick="show('courses')">Courses</button>
+  <button onclick="show('contact')">Contact</button>
+  <button onclick="logout()">Logout</button>
+</div><div id="courses" class="box hidden">
+  <h2>Courses</h2>
+  <div id="courseList"></div>
+  <button onclick="show('profile')">Back</button>
+</div><div id="contact" class="box hidden">
+  <h2>Contact</h2>
+  <input id="cname" placeholder="Name">
+  <input id="cemail" placeholder="Email">
+  <textarea id="cmsg" placeholder="Message"></textarea>
+  <button onclick="sendMsg()">Send</button>
+  <button onclick="show('profile')">Back</button>
+</div></div><script>
+function show(id){
+  document.querySelectorAll('.box').forEach(d=>d.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function register(){
+  let name = rname.value;
+  let roll = rroll.value;
+  let pass = rpass.value;
+  let course = rcourse.value;
+
+  if(!name || !roll || !pass){ alert("Fill all fields"); return; }
+  if(!course){ alert("Select course"); return; }
+
+  let users = JSON.parse(localStorage.getItem("students")) || [];
+
+  if(users.some(u => u.roll === roll)){
+    alert("Roll already exists"); return;
+  }
+
+  users.push({name, roll, pass:btoa(pass), course});
+  localStorage.setItem("students", JSON.stringify(users));
+
+  alert("Registered Successfully!");
+  show('login');
+}
+
+function login(){
+  let users = JSON.parse(localStorage.getItem("students")) || [];
+  let user = users.find(u => u.roll === lroll.value && u.pass === btoa(lpass.value));
+
+  if(user){
+    welcome.innerText = "Welcome " + user.name;
+    pdata.innerHTML = `
+      <div class="card">Roll: ${user.roll}</div>
+      <div class="card">Course: ${user.course}</div>
+    `;
+    show('profile');
+  } else alert("Invalid login");
+}
+
+let coursesData = {
+  Math: "Algebra, Calculus",
+  Physics: "Motion, Energy",
+  CS: "Programming Basics",
+  English: "Grammar skills"
+};
+
+for(let c in coursesData){
+  let div = document.createElement("div");
+  div.className="card";
+  div.innerHTML = `<b>${c}</b><br><small>${coursesData[c]}</small><br><button onclick="enroll('${c}')">Enroll</button>`;
+  courseList.appendChild(div);
+}
+
+function enroll(c){ alert("Enrolled in " + c + "\n" + coursesData[c]); }
+
+function sendMsg(){
+  if(!cname.value || !cemail.value || !cmsg.value){
+    alert("All fields required"); return;
+  }
+  alert("Message Sent!");
+}
+
+function logout(){ show('home'); }
+</script></body>
+</html>
